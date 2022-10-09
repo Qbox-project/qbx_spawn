@@ -7,8 +7,6 @@
     <link rel="stylesheet" type="text/css" href="reset.css"> <!-- RESET CSS -->
     <link rel="stylesheet" type="text/css" href="style.css"> <!-- STYLE CSS -->
 
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-
     <script type="text/javascript" src="vue.js"></script>
 
     <script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
@@ -66,27 +64,34 @@
                 },
 
                 methods: {
-                    click_location: function(type, name) {
+                    click_location: async function(type, name) {
                         if (type == "normal") { 
-                            axios.post('https://qb-spawn/setCam', {
-                                posname: name,
-                                type: type,
+                            await fetch('https://qb-spawn/setCam', {
+                                method: 'POST',
+                                body: JSON.stringify({
+                                    posname: name,
+                                    type: type,
+                                }),
                             });
                         }
                         viewmodel.selectedValue = {type: type, name: name}
                     },
 
-                    submit_spawn: function() {
+                    submit_spawn: async function() {
                         viewmodel.show = false
                         const data = viewmodel.selectedValue
                         if (data.type !== "appartment") {
-                            axios.post('https://qb-spawn/spawnplayer', {
-                                spawnloc: data.name,
-                                typeLoc: data.type
+                            await fetch('https://qb-spawn/spawnplayer', {
+                                method: 'POST',
+                                body: JSON.stringify({
+                                    spawnloc: data.name,
+                                    typeLoc: data.type,
+                                }),
                             });
                         } else {
-                            axios.post('https://qb-spawn/chooseAppa', {
-                                appType: data.name,
+                            await fetch('https://qb-spawn/chooseAppa', {
+                                method: 'POST',
+                                body: JSON.stringify({ appType: data.name }),
                             });
                         }
                     }
