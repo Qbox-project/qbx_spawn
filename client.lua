@@ -49,7 +49,7 @@ RegisterNetEvent('qb-spawn:client:setupSpawns', function(cData, new, apps)
                 for i = 1, (#houses), 1 do
                     myHouses[#myHouses+1] = {
                         house = houses[i].house,
-                        label = Houses[houses[i].house].adress,
+                        label = houses[i].house,
                     }
                 end
             end
