@@ -12,12 +12,19 @@ local cam2 = nil
 
 -- Functions
 
-local function SetDisplay(bool)
-    choosingSpawn = bool
-    SetNuiFocus(bool, bool)
+--- Displays the spawn UI and disables controls
+---@param isChoosingSpawn boolean
+local function SetDisplay(isChoosingSpawn)
+    -- launches a thread to disable controls if showing the UI
+    if choosingSpawn then launchDisableControlsThread() end
+    
+    -- sets the focus to the NUI window
+    SetNuiFocus(isChoosingSpawn, isChoosingSpawn)
+
+    -- sends a message to the NUI window to show or hide the UI
     SendNUIMessage({
         action = "showUi",
-        status = bool
+        status = isChoosingSpawn
     })
 end
 
@@ -209,13 +216,12 @@ end)
 
 -- Threads
 
-CreateThread(function()
-    while true do
-        Wait(0)
-        if choosingSpawn then
+-- Stops player from moving while choosing spawn
+function launchDisableControlsThread()
+    Citizen.CreateThread(function()
+        while choosingSpawn do
+            Citizen.Wait(0)
             DisableAllControlActions(0)
-        else
-            Wait(1000)
         end
-    end
-end)
+    end)
+end
