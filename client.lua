@@ -5,18 +5,28 @@ local pointCamCoords = 75
 local pointCamCoords2 = 0
 local cam1Time = 500
 local cam2Time = 1000
-local choosingSpawn = false
+local isChoosingSpawn = false
 local Houses = {}
 local cam = nil
 local cam2 = nil
 
 -- Functions
 
+-- Stops player from moving while choosing spawn
+local function launchDisableControlsThread()
+    CreateThread(function()
+        while isChoosingSpawn do
+            Wait(0)
+            DisableAllControlActions(0)
+        end
+    end)
+end
+
 --- Displays the spawn UI and disables controls
 ---@param isChoosingSpawn boolean
 local function SetDisplay(isChoosingSpawn)
     -- launches a thread to disable controls if showing the UI
-    if choosingSpawn then launchDisableControlsThread() end
+    if isChoosingSpawn then launchDisableControlsThread() end
     
     -- sets the focus to the NUI window
     SetNuiFocus(isChoosingSpawn, isChoosingSpawn)
@@ -86,7 +96,7 @@ RegisterNUICallback("exit", function(_, cb)
         action = "showUi",
         status = false
     })
-    choosingSpawn = false
+    isChoosingSpawn = false
     cb("ok")
 end)
 
@@ -213,15 +223,3 @@ RegisterNUICallback('spawnplayer', function(data, cb)
     end
     cb('ok')
 end)
-
--- Threads
-
--- Stops player from moving while choosing spawn
-function launchDisableControlsThread()
-    Citizen.CreateThread(function()
-        while choosingSpawn do
-            Citizen.Wait(0)
-            DisableAllControlActions(0)
-        end
-    end)
-end
