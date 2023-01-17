@@ -22,19 +22,23 @@ local function launchDisableControlsThread()
     end)
 end
 
---- Displays the spawn UI and disables controls
----@param isChoosingSpawn boolean
-local function SetDisplay(isChoosingSpawn)
+---Displays the spawn UI and disables controls
+---@param isShowing boolean
+---@return void
+local function SetDisplay(isShowing)
+    -- sets the global variable to the value passed in
+    isChoosingSpawn = isShowing
+
     -- launches a thread to disable controls if showing the UI
-    if isChoosingSpawn then launchDisableControlsThread() end
-    
+    if isShowing then launchDisableControlsThread() end
+
     -- sets the focus to the NUI window
-    SetNuiFocus(isChoosingSpawn, isChoosingSpawn)
+    SetNuiFocus(isShowing, isShowing)
 
     -- sends a message to the NUI window to show or hide the UI
     SendNUIMessage({
         action = "showUi",
-        status = isChoosingSpawn
+        status = isShowing
     })
 end
 
