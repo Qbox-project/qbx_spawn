@@ -25,7 +25,7 @@ end
 ---Displays the spawn UI and disables controls
 ---@param isShowing boolean
 ---@return void
-local function SetDisplay(isShowing)
+local function setDisplay(isShowing)
     -- sets the global variable to the value passed in
     isChoosingSpawn = isShowing
 
@@ -55,7 +55,7 @@ RegisterNetEvent('qb-spawn:client:openUI', function(value)
         RenderScriptCams(true, false, 1, true, true)
     end)
     Wait(500)
-    SetDisplay(value)
+    setDisplay(value)
 end)
 
 RegisterNetEvent('qb-houses:client:setHouseConfig', function(houseConfig)
@@ -144,7 +144,7 @@ end)
 RegisterNUICallback('chooseAppa', function(data, cb)
     local ped = PlayerPedId()
     local appaYeet = data.appType
-    SetDisplay(false)
+    setDisplay(false)
     DoScreenFadeOut(500)
     Wait(5000)
     TriggerServerEvent("apartments:server:CreateApartment", appaYeet, Apartments.Locations[appaYeet].label)
@@ -161,7 +161,7 @@ RegisterNUICallback('chooseAppa', function(data, cb)
 end)
 
 local function PreSpawnPlayer()
-    SetDisplay(false)
+    setDisplay(false)
     DoScreenFadeOut(500)
     Wait(2000)
 end
