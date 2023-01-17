@@ -25,7 +25,7 @@ end
 ---Displays the spawn UI and disables controls
 ---@param isShowing boolean
 ---@return void
-local function SetDisplay(isShowing)
+local function setDisplay(isShowing)
     -- sets the global variable to the value passed in
     isChoosingSpawn = isShowing
 
