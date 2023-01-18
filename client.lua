@@ -26,16 +26,9 @@ end
 ---@param isShowing boolean
 ---@return void
 local function setDisplay(isShowing)
-    -- sets the global variable to the value passed in
     isChoosingSpawn = isShowing
-
-    -- launches a thread to disable controls if showing the UI
     if isShowing then launchDisableControlsThread() end
-
-    -- sets the focus to the NUI window
     SetNuiFocus(isShowing, isShowing)
-
-    -- sends a message to the NUI window to show or hide the UI
     SendNUIMessage({
         action = "showUi",
         status = isShowing
