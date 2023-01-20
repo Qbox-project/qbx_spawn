@@ -5,19 +5,33 @@ local pointCamCoords = 75
 local pointCamCoords2 = 0
 local cam1Time = 500
 local cam2Time = 1000
-local choosingSpawn = false
+local isChoosingSpawn = false
 local Houses = {}
 local cam = nil
 local cam2 = nil
 
 -- Functions
 
-local function SetDisplay(bool)
-    choosingSpawn = bool
-    SetNuiFocus(bool, bool)
+-- Stops player from moving while choosing spawn
+local function launchDisableControlsThread()
+    CreateThread(function()
+        while isChoosingSpawn do
+            Wait(0)
+            DisableAllControlActions(0)
+        end
+    end)
+end
+
+---Displays the spawn UI and disables controls
+---@param isShowing boolean
+---@return void
+local function setDisplay(isShowing)
+    isChoosingSpawn = isShowing
+    if isShowing then launchDisableControlsThread() end
+    SetNuiFocus(isShowing, isShowing)
     SendNUIMessage({
         action = "showUi",
-        status = bool
+        status = isShowing
     })
 end
 
@@ -34,7 +48,7 @@ RegisterNetEvent('qb-spawn:client:openUI', function(value)
         RenderScriptCams(true, false, 1, true, true)
     end)
     Wait(500)
-    SetDisplay(value)
+    setDisplay(value)
 end)
 
 RegisterNetEvent('qb-houses:client:setHouseConfig', function(houseConfig)
@@ -79,7 +93,7 @@ RegisterNUICallback("exit", function(_, cb)
         action = "showUi",
         status = false
     })
-    choosingSpawn = false
+    isChoosingSpawn = false
     cb("ok")
 end)
 
@@ -123,7 +137,7 @@ end)
 RegisterNUICallback('chooseAppa', function(data, cb)
     local ped = PlayerPedId()
     local appaYeet = data.appType
-    SetDisplay(false)
+    setDisplay(false)
     DoScreenFadeOut(500)
     Wait(5000)
     TriggerServerEvent("apartments:server:CreateApartment", appaYeet, Apartments.Locations[appaYeet].label)
@@ -140,7 +154,7 @@ RegisterNUICallback('chooseAppa', function(data, cb)
 end)
 
 local function PreSpawnPlayer()
-    SetDisplay(false)
+    setDisplay(false)
     DoScreenFadeOut(500)
     Wait(2000)
 end
@@ -205,17 +219,4 @@ RegisterNUICallback('spawnplayer', function(data, cb)
         PostSpawnPlayer()
     end
     cb('ok')
-end)
-
--- Threads
-
-CreateThread(function()
-    while true do
-        Wait(0)
-        if choosingSpawn then
-            DisableAllControlActions(0)
-        else
-            Wait(1000)
-        end
-    end
 end)
