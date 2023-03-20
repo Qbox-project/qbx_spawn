@@ -66,7 +66,7 @@
                 methods: {
                     click_location: async function(type, name) {
                         if (type == "normal") { 
-                            await fetch('https://qb-spawn/setCam', {
+                            await fetch(`https://${GetParentResourceName()}/setCam`, {
                                 method: 'POST',
                                 body: JSON.stringify({
                                     posname: name,
@@ -81,7 +81,7 @@
                         viewmodel.show = false
                         const data = viewmodel.selectedValue
                         if (data.type !== "appartment") {
-                            await fetch('https://qb-spawn/spawnplayer', {
+                            await fetch(`https://${GetParentResourceName()}/spawnplayer`, {
                                 method: 'POST',
                                 body: JSON.stringify({
                                     spawnloc: data.name,
@@ -89,7 +89,7 @@
                                 }),
                             });
                         } else {
-                            await fetch('https://qb-spawn/chooseAppa', {
+                            await fetch(`https://${GetParentResourceName()}/chooseAppa`, {
                                 method: 'POST',
                                 body: JSON.stringify({ appType: data.name }),
                             });
