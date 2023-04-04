@@ -1,4 +1,4 @@
-local QBCore = exports['qb-core']:GetCoreObject()
+local QBCore = exports['qbx-core']:GetCoreObject()
 local camZPlus1 = 1500
 local camZPlus2 = 50
 local pointCamCoords = 75
