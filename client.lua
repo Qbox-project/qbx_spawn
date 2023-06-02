@@ -57,25 +57,24 @@ end)
 
 RegisterNetEvent('qb-spawn:client:setupSpawns', function(cData, new, apps)
     if not new then
-        QBCore.Functions.TriggerCallback('qb-spawn:server:getOwnedHouses', function(houses)
-            local myHouses = {}
-            if houses ~= nil then
-                for i = 1, (#houses), 1 do
-                    myHouses[#myHouses+1] = {
-                        house = houses[i].house,
-                        label = Houses[houses[i].house].adress,
-                    }
-                end
+        local houses = lib.callback.await('qb-spawn:server:getOwnedHouses', false, cData.citizenid)
+        local myHouses = {}
+        if houses then
+            for i = 1, #houses do
+                myHouses[#myHouses+1] = {
+                    house = houses[i].house,
+                    label = Houses[houses[i].house].adress,
+                }
             end
+        end
 
-            Wait(500)
-            SendNUIMessage({
-                action = "setupLocations",
-                locations = QB.Spawns,
-                houses = myHouses,
-                isNew = new
-            })
-        end, cData.citizenid)
+        Wait(500)
+        SendNUIMessage({
+            action = "setupLocations",
+            locations = QB.Spawns,
+            houses = myHouses,
+            isNew = new
+        })
     elseif new then
         SendNUIMessage({
             action = "setupAppartements",
