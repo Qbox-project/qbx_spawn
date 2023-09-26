@@ -41,7 +41,7 @@ RegisterNetEvent('qb-spawn:client:openUI', function(value)
     DoScreenFadeOut(250)
     Wait(1000)
     DoScreenFadeIn(250)
-    cam = CreateCamWithParams("DEFAULT_SCRIPTED_CAMERA", PlayerData.position.x, PlayerData.position.y, PlayerData.position.z + camZPlus1, -85.00, 0.00, 0.00, 100.00, false, 0)
+    cam = CreateCamWithParams("DEFAULT_SCRIPTED_CAMERA", QBX.PlayerData.position.x, QBX.PlayerData.position.y, QBX.PlayerData.position.z + camZPlus1, -85.00, 0.00, 0.00, 100.00, false, 0)
     SetCamActive(cam, true)
     RenderScriptCams(true, false, 1, true, true)
     Wait(500)
@@ -117,7 +117,7 @@ RegisterNUICallback('setCam', function(data, cb)
     if DoesCamExist(cam) then DestroyCam(cam, true) end
     if DoesCamExist(cam2) then DestroyCam(cam2, true) end
     if type == "current" then
-        SetCam(PlayerData.position)
+        SetCam(QBX.PlayerData.position)
     elseif type == "house" then
         SetCam(Houses[location].coords.enter)
     elseif type == "normal" then
@@ -167,11 +167,11 @@ end
 RegisterNUICallback('spawnplayer', function(data, cb)
     local location = tostring(data.spawnloc)
     local type = tostring(data.typeLoc)
-    local insideMeta = PlayerData.metadata["inside"]
+    local insideMeta = QBX.PlayerData.metadata["inside"]
     if type == "current" then
         PreSpawnPlayer()
-        SetEntityCoords(cache.ped, PlayerData.position.x, PlayerData.position.y, PlayerData.position.z)
-        SetEntityHeading(cache.ped, PlayerData.position.a)
+        SetEntityCoords(cache.ped, QBX.PlayerData.position.x, QBX.PlayerData.position.y, QBX.PlayerData.position.z)
+        SetEntityHeading(cache.ped, QBX.PlayerData.position.a)
         FreezeEntityPosition(cache.ped, false)
 
         if insideMeta.house ~= nil then
