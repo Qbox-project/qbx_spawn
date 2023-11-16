@@ -1,28 +1,27 @@
 fx_version 'cerulean'
 game 'gta5'
 
-description 'qbx_Spawn'
+description 'QBX_Spawn'
 repository 'https://github.com/Qbox-project/qbx_spawn'
 version '1.0.0'
 
 shared_scripts {
 	'config.lua',
 	'@ox_lib/init.lua',
-	'@qbx_core/import.lua',
 	'@qbx_apartments/config.lua'
 }
 
-client_script 'client.lua'
+client_scripts {
+	'@qbx_core/modules/playerdata.lua',
+	'client.lua'
+}
+
 server_scripts {
 	'@oxmysql/lib/MySQL.lua',
 	'server.lua'
 }
 
 ui_page 'html/index.html'
-
-modules {
-    'qbx_core:playerdata'
-}
 
 files {
 	'html/index.html',
