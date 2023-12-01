@@ -1,3 +1,4 @@
+local config = require '@qbx_apartments.config.shared'
 local camZPlus1 = 1500
 local camZPlus2 = 50
 local pointCamCoords = 75
@@ -123,7 +124,7 @@ RegisterNUICallback('setCam', function(data, cb)
     elseif type == "normal" then
         SetCam(QB.Spawns[location].coords)
     elseif type == "appartment" then
-        SetCam(Apartments.Locations[location].coords.enter)
+        SetCam(config.locations[location].coords.enter)
     end
     cb('ok')
 end)
@@ -133,7 +134,7 @@ RegisterNUICallback('chooseAppa', function(data, cb)
     setDisplay(false)
     DoScreenFadeOut(500)
     Wait(5000)
-    TriggerServerEvent("apartments:server:CreateApartment", appaYeet, Apartments.Locations[appaYeet].label)
+    TriggerServerEvent("apartments:server:CreateApartment", appaYeet, config.locations[appaYeet].label)
     TriggerServerEvent('QBCore:Server:OnPlayerLoaded')
     TriggerEvent('QBCore:Client:OnPlayerLoaded')
     FreezeEntityPosition(cache.ped, false)
