@@ -6,19 +6,19 @@ local arrowStart = {
     vec2(-2390.23, 6262.24)
 }
 
-local function SetupCamera()
+local function setupCamera()
     previewCam = CreateCamWithParams('DEFAULT_SCRIPTED_CAMERA', -24.77, -590.35, 90.8, -2.0, 0.0, 160.0, 45.0, false, 2)
     SetCamActive(previewCam, true)
     RenderScriptCams(true, false, 1, true, true)
 end
 
-local function StopCamera()
+local function stopCamera()
     SetCamActive(previewCam, false)
     DestroyCam(previewCam, true)
     RenderScriptCams(false, false, 1, true, true)
 end
 
-local function ManagePlayer()
+local function managePlayer()
     SetEntityCoords(cache.ped, -21.58, -583.76, 86.31, false, false, false, false)
     FreezeEntityPosition(cache.ped, true)
     SetTimeout(500, function()
@@ -29,7 +29,7 @@ end
 local scaleform
 local currentButtonID, previousButtonID = 1, 1
 
-local function SetupMap()
+local function setupMap()
     scaleform = RequestScaleformMovie('HEISTMAP_MP')
     CreateThread(function()
         while not HasScaleformMovieLoaded(scaleform) do Wait(0) end
@@ -80,7 +80,7 @@ local function scaleformDetails(index)
     EndScaleformMovieMethod()
 end
 
-local function UpdateScaleform()
+local function updateScaleform()
     if previousButtonID == currentButtonID then return end
 
     BeginScaleformMovieMethod(scaleform, 'REMOVE_HIGHLIGHT')
@@ -98,18 +98,18 @@ local function UpdateScaleform()
     scaleformDetails(currentButtonID)
 end
 
-local function InputHandler()
+local function inputHandler()
     while DoesCamExist(previewCam) do
         if IsControlJustReleased(0, 188) then
             previousButtonID = currentButtonID
             currentButtonID = currentButtonID - 1
             if currentButtonID < 1 then currentButtonID = 1 end
-            UpdateScaleform()
+            updateScaleform()
         elseif IsControlJustReleased(0, 187) then
             previousButtonID = currentButtonID
             currentButtonID = currentButtonID + 1
             if currentButtonID > #config.spawns then currentButtonID = #config.spawns end
-            UpdateScaleform()
+            updateScaleform()
         elseif IsControlJustReleased(0, 191) then
             DoScreenFadeOut(1000)
             while not IsScreenFadedOut() do Wait(0) end
@@ -124,7 +124,7 @@ local function InputHandler()
         end
         Wait(0)
     end
-    StopCamera()
+    stopCamera()
 end
 
 AddEventHandler('qb-spawn:client:setupSpawns', function()
@@ -133,10 +133,10 @@ AddEventHandler('qb-spawn:client:setupSpawns', function()
         coords = lib.callback.await('qbx_spawn:callback:getLastLocation')
     }
     Wait(400)
-    ManagePlayer()
-    SetupCamera()
-    SetupMap()
+    managePlayer()
+    setupCamera()
+    setupMap()
     Wait(400)
     scaleformDetails(currentButtonID)
-    InputHandler()
+    inputHandler()
 end)
