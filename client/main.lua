@@ -1,3 +1,4 @@
+local config = require 'config.client'
 local previewCam
 local arrowStart = {
     vec2(-3150.25, -1427.83),
@@ -42,8 +43,8 @@ end
 local function scaleformDetails(index)
     BeginScaleformMovieMethod(scaleform, 'ADD_HIGHLIGHT')
     ScaleformMovieMethodAddParamInt(1)
-    ScaleformMovieMethodAddParamFloat(Spawns[index].coords.x)
-    ScaleformMovieMethodAddParamFloat(Spawns[index].coords.y)
+    ScaleformMovieMethodAddParamFloat(config.spawns[index].coords.x)
+    ScaleformMovieMethodAddParamFloat(config.spawns[index].coords.y)
     ScaleformMovieMethodAddParamFloat(500.0)
     ScaleformMovieMethodAddParamInt(255)
     ScaleformMovieMethodAddParamInt(0)
@@ -53,9 +54,9 @@ local function scaleformDetails(index)
 
     BeginScaleformMovieMethod(scaleform, 'ADD_TEXT')
     ScaleformMovieMethodAddParamInt(1)
-    ScaleformMovieMethodAddParamTextureNameString(Spawns[index].label)
-    ScaleformMovieMethodAddParamFloat(Spawns[index].coords.x)
-    ScaleformMovieMethodAddParamFloat(Spawns[index].coords.y - 500)
+    ScaleformMovieMethodAddParamTextureNameString(config.spawns[index].label)
+    ScaleformMovieMethodAddParamFloat(config.spawns[index].coords.x)
+    ScaleformMovieMethodAddParamFloat(config.spawns[index].coords.y - 500)
     ScaleformMovieMethodAddParamFloat(25 - math.random(0, 50))
     ScaleformMovieMethodAddParamInt(26)
     EndScaleformMovieMethod()
@@ -65,8 +66,8 @@ local function scaleformDetails(index)
     ScaleformMovieMethodAddParamInt(1)
     ScaleformMovieMethodAddParamFloat(randomCoords.x)
     ScaleformMovieMethodAddParamFloat(randomCoords.y)
-    ScaleformMovieMethodAddParamFloat(Spawns[index].coords.x)
-    ScaleformMovieMethodAddParamFloat(Spawns[index].coords.y)
+    ScaleformMovieMethodAddParamFloat(config.spawns[index].coords.x)
+    ScaleformMovieMethodAddParamFloat(config.spawns[index].coords.y)
     ScaleformMovieMethodAddParamFloat(math.random(30, 80))
     EndScaleformMovieMethod()
 
@@ -107,7 +108,7 @@ local function InputHandler()
         elseif IsControlJustReleased(0, 187) then
             previousButtonID = currentButtonID
             currentButtonID = currentButtonID + 1
-            if currentButtonID > #Spawns then currentButtonID = #Spawns end
+            if currentButtonID > #config.spawns then currentButtonID = #config.spawns end
             UpdateScaleform()
         elseif IsControlJustReleased(0, 191) then
             DoScreenFadeOut(1000)
@@ -115,7 +116,7 @@ local function InputHandler()
             TriggerServerEvent('QBCore:Server:OnPlayerLoaded')
             TriggerEvent('QBCore:Client:OnPlayerLoaded')
             FreezeEntityPosition(cache.ped, false)
-            local coords = Spawns[currentButtonID].coords
+            local coords = config.spawns[currentButtonID].coords
             SetEntityCoords(cache.ped, coords.x, coords.y, coords.z, false, false, false, false)
             SetEntityHeading(cache.ped, coords.w or 0.0)
             DoScreenFadeIn(1000)
@@ -127,7 +128,7 @@ local function InputHandler()
 end
 
 AddEventHandler('qb-spawn:client:setupSpawns', function()
-    Spawns[#Spawns+1] = {
+    config.spawns[#config.spawns+1] = {
         label = 'Last Location',
         coords = lib.callback.await('qbx_spawn:callback:getLastLocation')
     }
