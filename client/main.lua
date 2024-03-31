@@ -130,7 +130,7 @@ end
 AddEventHandler('qb-spawn:client:setupSpawns', function()
     config.spawns[#config.spawns+1] = {
         label = 'Last Location',
-        coords = lib.callback.await('qbx_spawn:callback:getLastLocation')
+        coords = lib.callback.await('qbx_spawn:server:getLastLocation')
     }
     Wait(400)
     managePlayer()
