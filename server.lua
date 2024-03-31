@@ -1,10 +1,5 @@
----@param cid string
----@return table?
-lib.callback.register('qb-spawn:server:getOwnedHouses', function(_, cid)
-    if cid ~= nil then
-        local houses = MySQL.query.await('SELECT * FROM player_houses WHERE citizenid = ?', {cid})
-        if houses[1] ~= nil then
-            return houses
-        end
-    end
+
+lib.callback.register('qbx_spawn:callback:getLastLocation', function(source)
+    local player = exports.qbx_core:GetPlayer(source)
+    return json.decode(MySQL.single.await('SELECT position FROM players WHERE citizenid = ?', {player.PlayerData.citizenid}).position)
 end)
