@@ -1,5 +1,8 @@
 local config = require 'config.client'
 local previewCam
+local scaleform
+local currentButtonID =  1
+local previousButtonID = 1
 local arrowStart = {
     vec2(-3150.25, -1427.83),
     vec2(4173.08, 1338.72),
@@ -21,18 +24,16 @@ end
 local function managePlayer()
     SetEntityCoords(cache.ped, -21.58, -583.76, 86.31, false, false, false, false)
     FreezeEntityPosition(cache.ped, true)
+
     SetTimeout(500, function()
         DoScreenFadeIn(5000)
     end)
 end
 
-local scaleform
-local currentButtonID, previousButtonID = 1, 1
-
 local function setupMap()
-    scaleform = RequestScaleformMovie('HEISTMAP_MP')
+    scaleform = lib.requestScaleformMovie('HEISTMAP_MP')
+
     CreateThread(function()
-        while not HasScaleformMovieLoaded(scaleform) do Wait(0) end
         while DoesCamExist(previewCam) do
             DrawScaleformMovie_3d(scaleform, -24.86, -593.38, 91.8, -180.0, -180.0, -20.0, 0.0, 2.0, 0.0, 3.815, 2.27, 1.0, 2)
             Wait(0)
@@ -61,8 +62,9 @@ local function scaleformDetails(index)
     ScaleformMovieMethodAddParamInt(26)
     EndScaleformMovieMethod()
 
-    BeginScaleformMovieMethod(scaleform, 'ADD_ARROW')
     local randomCoords = arrowStart[math.random(1, #arrowStart)]
+
+    BeginScaleformMovieMethod(scaleform, 'ADD_ARROW')
     ScaleformMovieMethodAddParamInt(1)
     ScaleformMovieMethodAddParamFloat(randomCoords.x)
     ScaleformMovieMethodAddParamFloat(randomCoords.y)
@@ -103,25 +105,40 @@ local function inputHandler()
         if IsControlJustReleased(0, 188) then
             previousButtonID = currentButtonID
             currentButtonID = currentButtonID - 1
-            if currentButtonID < 1 then currentButtonID = 1 end
+
+            if currentButtonID < 1 then
+                currentButtonID = 1
+            end
+
             updateScaleform()
         elseif IsControlJustReleased(0, 187) then
             previousButtonID = currentButtonID
             currentButtonID = currentButtonID + 1
-            if currentButtonID > #config.spawns then currentButtonID = #config.spawns end
+
+            if currentButtonID > #config.spawns then
+                currentButtonID = #config.spawns
+            end
+
             updateScaleform()
         elseif IsControlJustReleased(0, 191) then
             DoScreenFadeOut(1000)
-            while not IsScreenFadedOut() do Wait(0) end
+
+            while not IsScreenFadedOut() do
+                Wait(0)
+            end
+
             TriggerServerEvent('QBCore:Server:OnPlayerLoaded')
             TriggerEvent('QBCore:Client:OnPlayerLoaded')
             FreezeEntityPosition(cache.ped, false)
+
             local coords = config.spawns[currentButtonID].coords
+
             SetEntityCoords(cache.ped, coords.x, coords.y, coords.z, false, false, false, false)
             SetEntityHeading(cache.ped, coords.w or 0.0)
             DoScreenFadeIn(1000)
             break
         end
+
         Wait(0)
     end
     stopCamera()
@@ -132,11 +149,15 @@ AddEventHandler('qb-spawn:client:setupSpawns', function()
         label = 'Last Location',
         coords = lib.callback.await('qbx_spawn:server:getLastLocation')
     }
+
     Wait(400)
+
     managePlayer()
     setupCamera()
     setupMap()
+
     Wait(400)
+
     scaleformDetails(currentButtonID)
     inputHandler()
 end)
