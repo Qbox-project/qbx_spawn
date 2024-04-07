@@ -31,9 +31,13 @@ local function managePlayer()
 end
 
 local function setupMap()
-    scaleform = lib.requestScaleformMovie('HEISTMAP_MP')
+    scaleform = RequestScaleformMovie('HEISTMAP_MP')
 
     CreateThread(function()
+        while not HasScaleformMovieLoaded(scaleform) do
+            Wait(0)
+        end
+
         while DoesCamExist(previewCam) do
             DrawScaleformMovie_3d(scaleform, -24.86, -593.38, 91.8, -180.0, -180.0, -20.0, 0.0, 2.0, 0.0, 3.815, 2.27, 1.0, 2)
             Wait(0)
