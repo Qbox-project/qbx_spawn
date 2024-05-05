@@ -19,6 +19,9 @@ local function stopCamera()
     SetCamActive(previewCam, false)
     DestroyCam(previewCam, true)
     RenderScriptCams(false, false, 1, true, true)
+
+    BeginScaleformMovieMethod(scaleform, 'CLEANUP')
+    EndScaleformMovieMethod()
 end
 
 local function managePlayer()
@@ -30,6 +33,23 @@ local function managePlayer()
     end)
 end
 
+local function CreateSpawnArea()
+
+    for i = 1, #config.spawns, 1 do
+        local spawn = config.spawns[i]
+        BeginScaleformMovieMethod(scaleform, 'ADD_AREA')
+        ScaleformMovieMethodAddParamInt(i)
+        ScaleformMovieMethodAddParamFloat(spawn.coords.x)
+        ScaleformMovieMethodAddParamFloat(spawn.coords.y)
+        ScaleformMovieMethodAddParamFloat(500.0)
+        ScaleformMovieMethodAddParamInt(255)
+        ScaleformMovieMethodAddParamInt(0)
+        ScaleformMovieMethodAddParamInt(0)
+        ScaleformMovieMethodAddParamInt(100)
+        EndScaleformMovieMethod()
+    end
+end
+
 local function setupMap()
     scaleform = RequestScaleformMovie('HEISTMAP_MP')
 
@@ -37,6 +57,8 @@ local function setupMap()
         while not HasScaleformMovieLoaded(scaleform) do
             Wait(0)
         end
+
+        CreateSpawnArea()
 
         while DoesCamExist(previewCam) do
             DrawScaleformMovie_3d(scaleform, -24.86, -593.38, 91.8, -180.0, -180.0, -20.0, 0.0, 2.0, 0.0, 3.815, 2.27, 1.0, 2)
@@ -47,29 +69,40 @@ end
 
 local function scaleformDetails(index)
     BeginScaleformMovieMethod(scaleform, 'ADD_HIGHLIGHT')
-    ScaleformMovieMethodAddParamInt(1)
+    ScaleformMovieMethodAddParamInt(index)
     ScaleformMovieMethodAddParamFloat(config.spawns[index].coords.x)
     ScaleformMovieMethodAddParamFloat(config.spawns[index].coords.y)
     ScaleformMovieMethodAddParamFloat(500.0)
-    ScaleformMovieMethodAddParamInt(255)
     ScaleformMovieMethodAddParamInt(0)
+    ScaleformMovieMethodAddParamInt(255)
     ScaleformMovieMethodAddParamInt(0)
     ScaleformMovieMethodAddParamInt(100)
     EndScaleformMovieMethod()
 
+    BeginScaleformMovieMethod(scaleform, 'COLOUR_AREA')
+    ScaleformMovieMethodAddParamInt(index)
+    ScaleformMovieMethodAddParamInt(0)
+    ScaleformMovieMethodAddParamInt(255)
+    ScaleformMovieMethodAddParamInt(0)
+    ScaleformMovieMethodAddParamInt(0)
+    EndScaleformMovieMethod()
+
     BeginScaleformMovieMethod(scaleform, 'ADD_TEXT')
-    ScaleformMovieMethodAddParamInt(1)
+    ScaleformMovieMethodAddParamInt(index)
     ScaleformMovieMethodAddParamTextureNameString(config.spawns[index].label)
     ScaleformMovieMethodAddParamFloat(config.spawns[index].coords.x)
     ScaleformMovieMethodAddParamFloat(config.spawns[index].coords.y - 500)
     ScaleformMovieMethodAddParamFloat(25 - math.random(0, 50))
     ScaleformMovieMethodAddParamInt(26)
+    ScaleformMovieMethodAddParamInt(100)
+    ScaleformMovieMethodAddParamInt(255)
+    ScaleformMovieMethodAddParamBool(true)
     EndScaleformMovieMethod()
 
     local randomCoords = arrowStart[math.random(1, #arrowStart)]
 
     BeginScaleformMovieMethod(scaleform, 'ADD_ARROW')
-    ScaleformMovieMethodAddParamInt(1)
+    ScaleformMovieMethodAddParamInt(index)
     ScaleformMovieMethodAddParamFloat(randomCoords.x)
     ScaleformMovieMethodAddParamFloat(randomCoords.y)
     ScaleformMovieMethodAddParamFloat(config.spawns[index].coords.x)
@@ -78,7 +111,7 @@ local function scaleformDetails(index)
     EndScaleformMovieMethod()
 
     BeginScaleformMovieMethod(scaleform, 'COLOUR_ARROW')
-    ScaleformMovieMethodAddParamInt(1)
+    ScaleformMovieMethodAddParamInt(index)
     ScaleformMovieMethodAddParamInt(255)
     ScaleformMovieMethodAddParamInt(0)
     ScaleformMovieMethodAddParamInt(0)
@@ -89,17 +122,27 @@ end
 local function updateScaleform()
     if previousButtonID == currentButtonID then return end
 
-    BeginScaleformMovieMethod(scaleform, 'REMOVE_HIGHLIGHT')
-    ScaleformMovieMethodAddParamInt(1)
-    EndScaleformMovieMethod()
+    for i = 1, #config.spawns, 1 do
+        BeginScaleformMovieMethod(scaleform, 'REMOVE_HIGHLIGHT')
+        ScaleformMovieMethodAddParamInt(i)
+        EndScaleformMovieMethod()
+    
+        BeginScaleformMovieMethod(scaleform, 'REMOVE_TEXT')
+        ScaleformMovieMethodAddParamInt(i)
+        EndScaleformMovieMethod()
+    
+        BeginScaleformMovieMethod(scaleform, 'REMOVE_ARROW')
+        ScaleformMovieMethodAddParamInt(i)
+        EndScaleformMovieMethod()
 
-    BeginScaleformMovieMethod(scaleform, 'REMOVE_TEXT')
-    ScaleformMovieMethodAddParamInt(1)
-    EndScaleformMovieMethod()
-
-    BeginScaleformMovieMethod(scaleform, 'REMOVE_ARROW')
-    ScaleformMovieMethodAddParamInt(1)
-    EndScaleformMovieMethod()
+        BeginScaleformMovieMethod(scaleform, 'COLOUR_AREA')
+        ScaleformMovieMethodAddParamInt(i)
+        ScaleformMovieMethodAddParamInt(255)
+        ScaleformMovieMethodAddParamInt(0)
+        ScaleformMovieMethodAddParamInt(0)
+        ScaleformMovieMethodAddParamInt(100)
+        EndScaleformMovieMethod()
+    end
 
     scaleformDetails(currentButtonID)
 end
@@ -111,7 +154,7 @@ local function inputHandler()
             currentButtonID = currentButtonID - 1
 
             if currentButtonID < 1 then
-                currentButtonID = 1
+                currentButtonID = #config.spawns
             end
 
             updateScaleform()
@@ -120,7 +163,7 @@ local function inputHandler()
             currentButtonID = currentButtonID + 1
 
             if currentButtonID > #config.spawns then
-                currentButtonID = #config.spawns
+                currentButtonID = 1
             end
 
             updateScaleform()
@@ -153,6 +196,14 @@ AddEventHandler('qb-spawn:client:setupSpawns', function()
         label = 'Last Location',
         coords = lib.callback.await('qbx_spawn:server:getLastLocation')
     }
+
+    local Houses = lib.callback.await('qbx_spawn:server:getHouses')
+    for i = 1, #Houses, 1 do
+        config.spawns[#config.spawns+1] = {
+            label = Houses[i].label,
+            coords = Houses[i].coords
+        }
+    end
 
     Wait(400)
 
