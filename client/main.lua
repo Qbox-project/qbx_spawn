@@ -197,6 +197,14 @@ AddEventHandler('qb-spawn:client:setupSpawns', function()
         coords = lib.callback.await('qbx_spawn:server:getLastLocation')
     }
 
+    local Houses = lib.callback.await('qbx_spawn:server:getHouses')
+    for i = 1, #Houses, 1 do
+        config.spawns[#config.spawns+1] = {
+            label = Houses[i].label,
+            coords = Houses[i].coords
+        }
+    end
+
     Wait(400)
 
     managePlayer()
