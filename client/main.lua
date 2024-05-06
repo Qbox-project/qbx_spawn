@@ -226,10 +226,11 @@ local function inputHandler()
 end
 
 AddEventHandler('qb-spawn:client:setupSpawns', function()
-    config.spawns[#config.spawns+1] = {
+    -- Using table.insert here we can insert the last location as the first item and move the rest
+    table.insert(config.spawns, 1, {
         label = 'Last Location',
         coords = lib.callback.await('qbx_spawn:server:getLastLocation')
-    }
+    })
 
     local houses = lib.callback.await('qbx_spawn:server:getHouses')
     for i = 1, #houses, 1 do
