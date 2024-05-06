@@ -1,8 +1,6 @@
 local config = require 'config.client'
-local previewCam
-local scaleform
-local currentButtonID =  1
-local previousButtonID = 1
+local previewCam, scaleform, buttonsScaleform
+local currentButtonID, previousButtonID = 1, 1
 local arrowStart = {
     vec2(-3150.25, -1427.83),
     vec2(4173.08, 1338.72),
@@ -49,20 +47,57 @@ local function createSpawnArea()
     end
 end
 
+local function setupInstructionalButton(index, control, text)
+    BeginScaleformMovieMethod(buttonsScaleform, 'SET_DATA_SLOT')
+
+    ScaleformMovieMethodAddParamInt(index)
+
+    ScaleformMovieMethodAddParamPlayerNameString(GetControlInstructionalButton(2, control, true))
+
+    BeginTextCommandScaleformString('STRING')
+    AddTextComponentSubstringKeyboardDisplay(text)
+    EndTextCommandScaleformString()
+
+    EndScaleformMovieMethod()
+end
+
+local function setupInstructionalScaleform()
+    DrawScaleformMovieFullscreen(buttonsScaleform, 255, 255, 255, 0, 0)
+
+    BeginScaleformMovieMethod(buttonsScaleform, 'CLEAR_ALL')
+    EndScaleformMovieMethod()
+
+    BeginScaleformMovieMethod(buttonsScaleform, 'SET_CLEAR_SPACE')
+    ScaleformMovieMethodAddParamInt(200)
+    EndScaleformMovieMethod()
+
+    setupInstructionalButton(0, 191, 'Submit')
+    setupInstructionalButton(1, 187, 'Down')
+    setupInstructionalButton(2, 188, 'Up')
+
+    BeginScaleformMovieMethod(buttonsScaleform, 'DRAW_INSTRUCTIONAL_BUTTONS')
+    EndScaleformMovieMethod()
+end
+
 local function setupMap()
-    scaleform = RequestScaleformMovie('HEISTMAP_MP')
-
+    scaleform = lib.requestScaleformMovie('HEISTMAP_MP') or 0
+    buttonsScaleform = lib.requestScaleformMovie('INSTRUCTIONAL_BUTTONS') or 0
     CreateThread(function()
-        while not HasScaleformMovieLoaded(scaleform) do
-            Wait(0)
-        end
-
+        setupInstructionalScaleform()
         createSpawnArea()
-
         while DoesCamExist(previewCam) do
             DrawScaleformMovie_3d(scaleform, -24.86, -593.38, 91.8, -180.0, -180.0, -20.0, 0.0, 2.0, 0.0, 3.815, 2.27, 1.0, 2)
+
+            HideHudComponentThisFrame(6)
+            HideHudComponentThisFrame(7)
+            HideHudComponentThisFrame(9)
+
+            DrawScaleformMovieFullscreen(buttonsScaleform, 255, 255, 255, 255, 0)
             Wait(0)
         end
+
+        SetScaleformMovieAsNoLongerNeeded(scaleform)
+        SetScaleformMovieAsNoLongerNeeded(buttonsScaleform)
     end)
 end
 
