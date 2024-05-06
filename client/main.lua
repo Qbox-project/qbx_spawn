@@ -33,8 +33,7 @@ local function managePlayer()
     end)
 end
 
-local function CreateSpawnArea()
-
+local function createSpawnArea()
     for i = 1, #config.spawns, 1 do
         local spawn = config.spawns[i]
         BeginScaleformMovieMethod(scaleform, 'ADD_AREA')
@@ -58,7 +57,7 @@ local function setupMap()
             Wait(0)
         end
 
-        CreateSpawnArea()
+        createSpawnArea()
 
         while DoesCamExist(previewCam) do
             DrawScaleformMovie_3d(scaleform, -24.86, -593.38, 91.8, -180.0, -180.0, -20.0, 0.0, 2.0, 0.0, 3.815, 2.27, 1.0, 2)
@@ -126,11 +125,11 @@ local function updateScaleform()
         BeginScaleformMovieMethod(scaleform, 'REMOVE_HIGHLIGHT')
         ScaleformMovieMethodAddParamInt(i)
         EndScaleformMovieMethod()
-    
+
         BeginScaleformMovieMethod(scaleform, 'REMOVE_TEXT')
         ScaleformMovieMethodAddParamInt(i)
         EndScaleformMovieMethod()
-    
+
         BeginScaleformMovieMethod(scaleform, 'REMOVE_ARROW')
         ScaleformMovieMethodAddParamInt(i)
         EndScaleformMovieMethod()
@@ -151,7 +150,7 @@ local function inputHandler()
     while DoesCamExist(previewCam) do
         if IsControlJustReleased(0, 188) then
             previousButtonID = currentButtonID
-            currentButtonID = currentButtonID - 1
+            currentButtonID -= 1
 
             if currentButtonID < 1 then
                 currentButtonID = #config.spawns
@@ -160,7 +159,7 @@ local function inputHandler()
             updateScaleform()
         elseif IsControlJustReleased(0, 187) then
             previousButtonID = currentButtonID
-            currentButtonID = currentButtonID + 1
+            currentButtonID += 1
 
             if currentButtonID > #config.spawns then
                 currentButtonID = 1
@@ -197,11 +196,11 @@ AddEventHandler('qb-spawn:client:setupSpawns', function()
         coords = lib.callback.await('qbx_spawn:server:getLastLocation')
     }
 
-    local Houses = lib.callback.await('qbx_spawn:server:getHouses')
-    for i = 1, #Houses, 1 do
+    local houses = lib.callback.await('qbx_spawn:server:getHouses')
+    for i = 1, #houses, 1 do
         config.spawns[#config.spawns+1] = {
-            label = Houses[i].label,
-            coords = Houses[i].coords
+            label = houses[i].label,
+            coords = houses[i].coords
         }
     end
 

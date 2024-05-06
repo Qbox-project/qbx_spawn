@@ -10,11 +10,11 @@ lib.callback.register('qbx_spawn:server:getHouses', function(source)
     for i = 1, #playerHouses, 1 do
         local name = playerHouses[i].house
         local locationData = MySQL.single.await('SELECT `coords`, `label` FROM houselocations WHERE name = ?', {name})
-        print(json.decode(locationData.coords).enter)
         houseData[#houseData+1] = {
             label = locationData.label,
             coords = json.decode(locationData.coords).enter
         }
     end
+
     return houseData
 end)
