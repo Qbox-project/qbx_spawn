@@ -6,6 +6,8 @@ description 'Spawn selection for Qbox'
 repository 'https://github.com/Qbox-project/qbx_spawn'
 version '1.0.0'
 
+ox_lib 'locale'
+
 shared_scripts {
 	'@ox_lib/init.lua',
 }
@@ -19,8 +21,9 @@ server_scripts {
 	'server/main.lua'
 }
 
-file {
-	'config/client.lua'
+files {
+	'config/client.lua',
+	'locales/*.json'
 }
 
 lua54 'yes'
