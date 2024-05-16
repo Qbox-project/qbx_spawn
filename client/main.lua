@@ -7,6 +7,8 @@ local arrowStart = {
     vec2(-2390.23, 6262.24)
 }
 
+local spawns
+
 local function setupCamera()
     previewCam = CreateCamWithParams('DEFAULT_SCRIPTED_CAMERA', -24.77, -590.35, 90.8, -2.0, 0.0, 160.0, 45.0, false, 2)
     SetCamActive(previewCam, true)
@@ -32,8 +34,8 @@ local function managePlayer()
 end
 
 local function createSpawnArea()
-    for i = 1, #config.spawns, 1 do
-        local spawn = config.spawns[i]
+    for i = 1, #spawns, 1 do
+        local spawn = spawns[i]
         BeginScaleformMovieMethod(scaleform, 'ADD_AREA')
         ScaleformMovieMethodAddParamInt(i)
         ScaleformMovieMethodAddParamFloat(spawn.coords.x)
@@ -102,10 +104,11 @@ local function setupMap()
 end
 
 local function scaleformDetails(index)
+    local spawn = spawns[index]
     BeginScaleformMovieMethod(scaleform, 'ADD_HIGHLIGHT')
     ScaleformMovieMethodAddParamInt(index)
-    ScaleformMovieMethodAddParamFloat(config.spawns[index].coords.x)
-    ScaleformMovieMethodAddParamFloat(config.spawns[index].coords.y)
+    ScaleformMovieMethodAddParamFloat(spawn.coords.x)
+    ScaleformMovieMethodAddParamFloat(spawn.coords.y)
     ScaleformMovieMethodAddParamFloat(500.0)
     ScaleformMovieMethodAddParamInt(0)
     ScaleformMovieMethodAddParamInt(255)
@@ -123,24 +126,24 @@ local function scaleformDetails(index)
 
     BeginScaleformMovieMethod(scaleform, 'ADD_TEXT')
     ScaleformMovieMethodAddParamInt(index)
-    ScaleformMovieMethodAddParamTextureNameString(config.spawns[index].label)
-    ScaleformMovieMethodAddParamFloat(config.spawns[index].coords.x)
-    ScaleformMovieMethodAddParamFloat(config.spawns[index].coords.y - 500)
+    ScaleformMovieMethodAddParamTextureNameString(locale(spawn.label))
+    ScaleformMovieMethodAddParamFloat(spawn.coords.x)
+    ScaleformMovieMethodAddParamFloat(spawn.coords.y - 500)
     ScaleformMovieMethodAddParamFloat(25 - math.random(0, 50))
-    ScaleformMovieMethodAddParamInt(26)
+    ScaleformMovieMethodAddParamInt(24)
     ScaleformMovieMethodAddParamInt(100)
     ScaleformMovieMethodAddParamInt(255)
     ScaleformMovieMethodAddParamBool(true)
     EndScaleformMovieMethod()
 
-    local randomCoords = arrowStart[math.random(1, #arrowStart)]
+    local randomCoords = arrowStart[math.random(#arrowStart)]
 
     BeginScaleformMovieMethod(scaleform, 'ADD_ARROW')
     ScaleformMovieMethodAddParamInt(index)
     ScaleformMovieMethodAddParamFloat(randomCoords.x)
     ScaleformMovieMethodAddParamFloat(randomCoords.y)
-    ScaleformMovieMethodAddParamFloat(config.spawns[index].coords.x)
-    ScaleformMovieMethodAddParamFloat(config.spawns[index].coords.y)
+    ScaleformMovieMethodAddParamFloat(spawn.coords.x)
+    ScaleformMovieMethodAddParamFloat(spawn.coords.y)
     ScaleformMovieMethodAddParamFloat(math.random(30, 80))
     EndScaleformMovieMethod()
 
@@ -156,7 +159,7 @@ end
 local function updateScaleform()
     if previousButtonID == currentButtonID then return end
 
-    for i = 1, #config.spawns, 1 do
+    for i = 1, #spawns, 1 do
         BeginScaleformMovieMethod(scaleform, 'REMOVE_HIGHLIGHT')
         ScaleformMovieMethodAddParamInt(i)
         EndScaleformMovieMethod()
@@ -188,7 +191,7 @@ local function inputHandler()
             currentButtonID -= 1
 
             if currentButtonID < 1 then
-                currentButtonID = #config.spawns
+                currentButtonID = #spawns
             end
 
             updateScaleform()
@@ -196,7 +199,7 @@ local function inputHandler()
             previousButtonID = currentButtonID
             currentButtonID += 1
 
-            if currentButtonID > #config.spawns then
+            if currentButtonID > #spawns then
                 currentButtonID = 1
             end
 
@@ -212,7 +215,7 @@ local function inputHandler()
             TriggerEvent('QBCore:Client:OnPlayerLoaded')
             FreezeEntityPosition(cache.ped, false)
 
-            local coords = config.spawns[currentButtonID].coords
+            local coords = spawns[currentButtonID].coords
 
             SetEntityCoords(cache.ped, coords.x, coords.y, coords.z, false, false, false, false)
             SetEntityHeading(cache.ped, coords.w or 0.0)
@@ -226,18 +229,20 @@ local function inputHandler()
 end
 
 AddEventHandler('qb-spawn:client:setupSpawns', function()
-    -- Using table.insert here we can insert the last location as the first item and move the rest
-    table.insert(config.spawns, 1, {
-        label = 'Last Location',
+    spawns = {}
+
+    spawns[#spawns+1] = {
+        label = 'last_location',
         coords = lib.callback.await('qbx_spawn:server:getLastLocation')
-    })
+    }
+
+    for i = 1, #config.spawns do
+        spawns[#spawns+1] = config.spawns[i]
+    end
 
     local houses = lib.callback.await('qbx_spawn:server:getHouses')
-    for i = 1, #houses, 1 do
-        config.spawns[#config.spawns+1] = {
-            label = houses[i].label,
-            coords = houses[i].coords
-        }
+    for i = 1, #houses do
+        spawns[#spawns+1] = houses[i]
     end
 
     Wait(400)
