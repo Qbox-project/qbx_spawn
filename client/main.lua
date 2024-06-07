@@ -82,8 +82,8 @@ local function setupInstructionalScaleform()
 end
 
 local function setupMap()
-    scaleform = lib.requestScaleformMovie('HEISTMAP_MP') or 0
-    buttonsScaleform = lib.requestScaleformMovie('INSTRUCTIONAL_BUTTONS') or 0
+    scaleform = lib.requestScaleformMovie('HEISTMAP_MP', 5000) or 0
+    buttonsScaleform = lib.requestScaleformMovie('INSTRUCTIONAL_BUTTONS', 5000) or 0
     CreateThread(function()
         setupInstructionalScaleform()
         createSpawnArea()
