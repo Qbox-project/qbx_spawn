@@ -126,7 +126,7 @@ local function scaleformDetails(index)
 
     BeginScaleformMovieMethod(scaleform, 'ADD_TEXT')
     ScaleformMovieMethodAddParamInt(index)
-    ScaleformMovieMethodAddParamTextureNameString(locale(spawn.label))
+    ScaleformMovieMethodAddParamTextureNameString(spawn.label)
     ScaleformMovieMethodAddParamFloat(spawn.coords.x)
     ScaleformMovieMethodAddParamFloat(spawn.coords.y - 500)
     ScaleformMovieMethodAddParamFloat(25 - math.random(0, 50))
@@ -215,34 +215,42 @@ local function inputHandler()
             TriggerEvent('QBCore:Client:OnPlayerLoaded')
             FreezeEntityPosition(cache.ped, false)
 
-            local coords = spawns[currentButtonID].coords
+            local spawnData = spawns[currentButtonID]
+            if spawnData.propertyId then
+                TriggerServerEvent('qbx_properties:server:enterProperty', { id = spawnData.propertyId, isSpawn = true })
+            else
+                SetEntityCoords(cache.ped, spawnData.coords.x, spawnData.coords.y, spawnData.coords.z, false, false, false, false)
+                SetEntityHeading(cache.ped, spawnData.coords.w or 0.0)
+            end
 
-            SetEntityCoords(cache.ped, coords.x, coords.y, coords.z, false, false, false, false)
-            SetEntityHeading(cache.ped, coords.w or 0.0)
             DoScreenFadeIn(1000)
+
             break
         end
 
         Wait(0)
     end
+
     stopCamera()
 end
 
 AddEventHandler('qb-spawn:client:setupSpawns', function()
     spawns = {}
 
-    spawns[#spawns+1] = {
-        label = 'last_location',
-        coords = lib.callback.await('qbx_spawn:server:getLastLocation')
+    local lastCoords, lastPropertyId = lib.callback.await('qbx_spawn:server:getLastLocation')
+    spawns[#spawns + 1] = {
+        label = locale('last_location'),
+        coords = lastCoords,
+        propertyId = lastPropertyId
     }
 
     for i = 1, #config.spawns do
-        spawns[#spawns+1] = config.spawns[i]
+        spawns[#spawns + 1] = config.spawns[i]
     end
 
     local houses = lib.callback.await('qbx_spawn:server:getHouses')
     for i = 1, #houses do
-        spawns[#spawns+1] = houses[i]
+        spawns[#spawns + 1] = houses[i]
     end
 
     Wait(400)
