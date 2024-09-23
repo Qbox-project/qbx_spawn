@@ -248,9 +248,9 @@ AddEventHandler('qb-spawn:client:setupSpawns', function()
         spawns[#spawns + 1] = config.spawns[i]
     end
 
-    local houses = lib.callback.await('qbx_spawn:server:getHouses')
-    for i = 1, #houses do
-        spawns[#spawns + 1] = houses[i]
+    local properties = lib.callback.await('qbx_spawn:server:getProperties')
+    for i = 1, #properties do
+        spawns[#spawns + 1] = properties[i]
     end
 
     Wait(400)
