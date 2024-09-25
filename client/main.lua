@@ -1,5 +1,5 @@
 local config = require 'config.client'
-local previewCam, scaleform, buttonsScaleform
+local previewCam, mapScaleform, buttonScaleform
 local currentButtonID, previousButtonID = 1, 1
 local arrowStart = {
     vec2(-3150.25, -1427.83),
@@ -16,12 +16,15 @@ local function setupCamera()
 end
 
 local function stopCamera()
+    if not previewCam then
+        return
+    end
     SetCamActive(previewCam, false)
     DestroyCam(previewCam, true)
     RenderScriptCams(false, false, 1, true, true)
 
-    BeginScaleformMovieMethod(scaleform, 'CLEANUP')
-    EndScaleformMovieMethod()
+    mapScaleform:Method('CLEANUP')
+    previewCam = nil
 end
 
 local function managePlayer()
@@ -34,157 +37,110 @@ local function managePlayer()
 end
 
 local function createSpawnArea()
-    for i = 1, #spawns, 1 do
-        local spawn = spawns[i]
-        BeginScaleformMovieMethod(scaleform, 'ADD_AREA')
-        ScaleformMovieMethodAddParamInt(i)
-        ScaleformMovieMethodAddParamFloat(spawn.coords.x)
-        ScaleformMovieMethodAddParamFloat(spawn.coords.y)
-        ScaleformMovieMethodAddParamFloat(500.0)
-        ScaleformMovieMethodAddParamInt(255)
-        ScaleformMovieMethodAddParamInt(0)
-        ScaleformMovieMethodAddParamInt(0)
-        ScaleformMovieMethodAddParamInt(100)
-        EndScaleformMovieMethod()
+    for i = 1, #spawns, 1 do    -- Loop through the spawns
+        local spawn = spawns[i] -- Get the spawn
+
+        -- Add the area to the map scaleform
+        mapScaleform:MethodArgs('ADD_AREA', { i, spawn.coords.x, spawn.coords.y, 500.0, 255, 0, 0, 100 })
     end
 end
 
-local function setupInstructionalButton(index, control, text)
-    BeginScaleformMovieMethod(buttonsScaleform, 'SET_DATA_SLOT')
-
-    ScaleformMovieMethodAddParamInt(index)
-
-    ScaleformMovieMethodAddParamPlayerNameString(GetControlInstructionalButton(2, control, true))
-
-    BeginTextCommandScaleformString('STRING')
-    AddTextComponentSubstringKeyboardDisplay(text)
-    EndTextCommandScaleformString()
-
-    EndScaleformMovieMethod()
-end
-
 local function setupInstructionalScaleform()
-    DrawScaleformMovieFullscreen(buttonsScaleform, 255, 255, 255, 0, 0)
+    -- Clear Current Buttons
+    buttonScaleform:Method('CLEAR_ALL')
+    buttonScaleform:MethodArgs("SET_CLEAR_SPACE", { 200 })
 
-    BeginScaleformMovieMethod(buttonsScaleform, 'CLEAR_ALL')
-    EndScaleformMovieMethod()
+    -- Define Buttons
+    local sumbit = GetControlInstructionalButton(2, 191, true)
+    local up = GetControlInstructionalButton(2, 188, true)
+    local down = GetControlInstructionalButton(2, 187, true)
 
-    BeginScaleformMovieMethod(buttonsScaleform, 'SET_CLEAR_SPACE')
-    ScaleformMovieMethodAddParamInt(200)
-    EndScaleformMovieMethod()
+    -- Add Buttons
+    buttonScaleform:MethodArgs('SET_DATA_SLOT', { 0, sumbit, 'Submit' })
+    buttonScaleform:MethodArgs('SET_DATA_SLOT', { 1, up, 'Down' })
+    buttonScaleform:MethodArgs('SET_DATA_SLOT', { 2, down, 'Up' })
 
-    setupInstructionalButton(0, 191, 'Submit')
-    setupInstructionalButton(1, 187, 'Down')
-    setupInstructionalButton(2, 188, 'Up')
-
-    BeginScaleformMovieMethod(buttonsScaleform, 'DRAW_INSTRUCTIONAL_BUTTONS')
-    EndScaleformMovieMethod()
+    -- Draw Buttons
+    buttonScaleform:Method('DRAW_INSTRUCTIONAL_BUTTONS')
 end
 
 local function setupMap()
-    scaleform = lib.requestScaleformMovie('HEISTMAP_MP', 5000) or 0
-    buttonsScaleform = lib.requestScaleformMovie('INSTRUCTIONAL_BUTTONS', 5000) or 0
+    mapScaleform = qbx.newScaleform('HEISTMAP_MP')              -- Create a new scaleform
+    buttonScaleform = qbx.newScaleform('INSTRUCTIONAL_BUTTONS') -- Create a new scaleform
+
     CreateThread(function()
-        setupInstructionalScaleform()
-        createSpawnArea()
-        while DoesCamExist(previewCam) do
-            DrawScaleformMovie_3d(scaleform, -24.86, -593.38, 91.8, -180.0, -180.0, -20.0, 0.0, 2.0, 0.0, 3.815, 2.27, 1.0, 2)
+        setupInstructionalScaleform() -- Setup the instructional scaleform
+        createSpawnArea()             -- Add the spawn areas to the map
 
-            HideHudComponentThisFrame(6)
-            HideHudComponentThisFrame(7)
-            HideHudComponentThisFrame(9)
-
-            DrawScaleformMovieFullscreen(buttonsScaleform, 255, 255, 255, 255, 0)
-            Wait(0)
+        if not previewCam then        -- check the camera is created
+            return
         end
 
-        SetScaleformMovieAsNoLongerNeeded(scaleform)
-        SetScaleformMovieAsNoLongerNeeded(buttonsScaleform)
+        mapScaleform:Draw(true)           -- Draw the map scaleform
+        buttonScaleform:Draw(true)        -- Draw the button scaleform
+
+        while DoesCamExist(previewCam) do -- while the camera exists
+            HideHudComponentThisFrame(6)  -- Vehicle Name
+            HideHudComponentThisFrame(7)  -- Area Name
+            HideHudComponentThisFrame(9)  -- Street Name
+
+            Wait(0)                       -- Wait a tick
+        end
+
+        -- Clean up the scaleforms
+        mapScaleform:Dispose()
+        buttonScaleform:Dispose()
+
+        -- Set the scaleform references to nil
+        mapScaleform = nil
+        buttonScaleform = nil
     end)
 end
 
 local function scaleformDetails(index)
     local spawn = spawns[index]
-    BeginScaleformMovieMethod(scaleform, 'ADD_HIGHLIGHT')
-    ScaleformMovieMethodAddParamInt(index)
-    ScaleformMovieMethodAddParamFloat(spawn.coords.x)
-    ScaleformMovieMethodAddParamFloat(spawn.coords.y)
-    ScaleformMovieMethodAddParamFloat(500.0)
-    ScaleformMovieMethodAddParamInt(0)
-    ScaleformMovieMethodAddParamInt(255)
-    ScaleformMovieMethodAddParamInt(0)
-    ScaleformMovieMethodAddParamInt(100)
-    EndScaleformMovieMethod()
 
-    BeginScaleformMovieMethod(scaleform, 'COLOUR_AREA')
-    ScaleformMovieMethodAddParamInt(index)
-    ScaleformMovieMethodAddParamInt(0)
-    ScaleformMovieMethodAddParamInt(255)
-    ScaleformMovieMethodAddParamInt(0)
-    ScaleformMovieMethodAddParamInt(0)
-    EndScaleformMovieMethod()
+    -- Add the highlight to the map 
+    mapScaleform:MethodArgs("ADD_HIGHLIGHT", { index, spawn.coords.x, spawn.coords.y, 500.0, 0, 255, 0, 100 })
 
-    BeginScaleformMovieMethod(scaleform, 'ADD_TEXT')
-    ScaleformMovieMethodAddParamInt(index)
-    ScaleformMovieMethodAddParamTextureNameString(spawn.label)
-    ScaleformMovieMethodAddParamFloat(spawn.coords.x)
-    ScaleformMovieMethodAddParamFloat(spawn.coords.y - 500)
-    ScaleformMovieMethodAddParamFloat(25 - math.random(0, 50))
-    ScaleformMovieMethodAddParamInt(24)
-    ScaleformMovieMethodAddParamInt(100)
-    ScaleformMovieMethodAddParamInt(255)
-    ScaleformMovieMethodAddParamBool(true)
-    EndScaleformMovieMethod()
+    -- Add the area to the map 
+    mapScaleform:MethodArgs("COLOUR_AREA", { index, 0, 255, 0, 100 })
 
+    -- Add the text to the map
+    mapScaleform:MethodArgs("ADD_TEXT", { index, spawn.label, spawn.coords.x,
+        spawn.coords.y - 500, 25 - math.random(0, 50), 24, 100, 255, true })
+
+    -- Get a random arrow start
     local randomCoords = arrowStart[math.random(#arrowStart)]
 
-    BeginScaleformMovieMethod(scaleform, 'ADD_ARROW')
-    ScaleformMovieMethodAddParamInt(index)
-    ScaleformMovieMethodAddParamFloat(randomCoords.x)
-    ScaleformMovieMethodAddParamFloat(randomCoords.y)
-    ScaleformMovieMethodAddParamFloat(spawn.coords.x)
-    ScaleformMovieMethodAddParamFloat(spawn.coords.y)
-    ScaleformMovieMethodAddParamFloat(math.random(30, 80))
-    EndScaleformMovieMethod()
+    -- Add the arrow to the map
+    mapScaleform:MethodArgs("ADD_ARROW", { index, randomCoords.x, randomCoords.y, 
+        spawn.coords.x, spawn.coords.y, math.random(30, 80) })
 
-    BeginScaleformMovieMethod(scaleform, 'COLOUR_ARROW')
-    ScaleformMovieMethodAddParamInt(index)
-    ScaleformMovieMethodAddParamInt(255)
-    ScaleformMovieMethodAddParamInt(0)
-    ScaleformMovieMethodAddParamInt(0)
-    ScaleformMovieMethodAddParamInt(100)
-    EndScaleformMovieMethod()
+    -- Colour the arrow
+    mapScaleform:MethodArgs("COLOUR_ARROW", { index, 255, 0, 0, 100 })
+
 end
 
 local function updateScaleform()
+    -- Check if the previous button is the same as the current button
     if previousButtonID == currentButtonID then return end
 
-    for i = 1, #spawns, 1 do
-        BeginScaleformMovieMethod(scaleform, 'REMOVE_HIGHLIGHT')
-        ScaleformMovieMethodAddParamInt(i)
-        EndScaleformMovieMethod()
-
-        BeginScaleformMovieMethod(scaleform, 'REMOVE_TEXT')
-        ScaleformMovieMethodAddParamInt(i)
-        EndScaleformMovieMethod()
-
-        BeginScaleformMovieMethod(scaleform, 'REMOVE_ARROW')
-        ScaleformMovieMethodAddParamInt(i)
-        EndScaleformMovieMethod()
-
-        BeginScaleformMovieMethod(scaleform, 'COLOUR_AREA')
-        ScaleformMovieMethodAddParamInt(i)
-        ScaleformMovieMethodAddParamInt(255)
-        ScaleformMovieMethodAddParamInt(0)
-        ScaleformMovieMethodAddParamInt(0)
-        ScaleformMovieMethodAddParamInt(100)
-        EndScaleformMovieMethod()
+    for i = 1, #spawns, 1 do                                          -- Loop through the spawns
+        mapScaleform:MethodArgs('REMOVE_HIGHLIGHT', { i })            -- Remove the highlight
+        mapScaleform:MethodArgs('REMOVE_TEXT', { i })                 -- Remove the text
+        mapScaleform:MethodArgs('REMOVE_ARROW', { i })                -- Remove the arrow
+        mapScaleform:MethodArgs('COLOUR_AREA', { i, 255, 0, 0, 100 }) -- Reset the colour
     end
 
-    scaleformDetails(currentButtonID)
+    scaleformDetails(currentButtonID) -- Add the details for the current button
 end
 
 local function inputHandler()
+    if not previewCam then
+        return
+    end
+
     while DoesCamExist(previewCam) do
         if IsControlJustReleased(0, 188) then
             previousButtonID = currentButtonID
@@ -219,7 +175,8 @@ local function inputHandler()
             if spawnData.propertyId then
                 TriggerServerEvent('qbx_properties:server:enterProperty', { id = spawnData.propertyId, isSpawn = true })
             else
-                SetEntityCoords(cache.ped, spawnData.coords.x, spawnData.coords.y, spawnData.coords.z, false, false, false, false)
+                SetEntityCoords(cache.ped, spawnData.coords.x, spawnData.coords.y, spawnData.coords.z, false, false,
+                    false, false)
                 SetEntityHeading(cache.ped, spawnData.coords.w or 0.0)
             end
 
