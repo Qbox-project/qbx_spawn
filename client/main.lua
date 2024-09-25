@@ -114,7 +114,7 @@ local function scaleformDetails(index)
     local randomCoords = arrowStart[math.random(#arrowStart)]
 
     -- Add the arrow to the map
-    mapScaleform:MethodArgs("ADD_ARROW", { index, randomCoords.x, randomCoords.y, 
+    mapScaleform:MethodArgs("ADD_ARROW", { index, randomCoords.x, randomCoords.y,
         spawn.coords.x, spawn.coords.y, math.random(30, 80) })
 
     -- Colour the arrow
