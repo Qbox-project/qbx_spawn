@@ -4,6 +4,10 @@ lib.callback.register('qbx_spawn:server:getLastLocation', function(source)
 end)
 
 lib.callback.register('qbx_spawn:server:getProperties', function(source)
+    if not GetResourceState('qbx_properties'):find('start') then
+        return {}
+    end
+
     local player = exports.qbx_core:GetPlayer(source)
     local houseData = {}
     local properties = MySQL.query.await('SELECT id, property_name, coords FROM properties WHERE owner = ?', {player.PlayerData.citizenid})
