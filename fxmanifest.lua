@@ -13,6 +13,7 @@ shared_scripts {
 }
 
 client_scripts {
+	"@qbx_core/modules/lib.lua",
 	'client/main.lua'
 }
 
