@@ -8,22 +8,18 @@ version '1.0.0'
 
 ox_lib 'locale'
 
-shared_scripts {
-	'@ox_lib/init.lua',
-}
+shared_script '@ox_lib/init.lua'
 
-client_scripts {
-	'client/main.lua'
-}
+client_script 'client/main.lua'
 
 server_scripts {
-	'@oxmysql/lib/MySQL.lua',
-	'server/main.lua'
+    '@oxmysql/lib/MySQL.lua',
+    'server/main.lua'
 }
 
 files {
-	'config/client.lua',
-	'locales/*.json'
+    'config/client.lua',
+    'locales/*.json'
 }
 
 lua54 'yes'
