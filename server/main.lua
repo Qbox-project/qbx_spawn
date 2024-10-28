@@ -1,3 +1,5 @@
+lib.versionCheck('Qbox-project/qbx_spawn')
+
 lib.callback.register('qbx_spawn:server:getLastLocation', function(source)
     local player = exports.qbx_core:GetPlayer(source)
     return json.decode(MySQL.single.await('SELECT position FROM players WHERE citizenid = ?', {player.PlayerData.citizenid}).position), player.PlayerData.metadata.currentPropertyId
