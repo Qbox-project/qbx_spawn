@@ -27,6 +27,7 @@ end
 local function managePlayer()
     SetEntityCoords(cache.ped, -21.58, -583.76, 86.31, false, false, false, false)
     FreezeEntityPosition(cache.ped, true)
+    DisplayRadar(false)
 
     SetTimeout(500, function()
         DoScreenFadeIn(5000)
@@ -214,6 +215,7 @@ local function inputHandler()
             TriggerServerEvent('QBCore:Server:OnPlayerLoaded')
             TriggerEvent('QBCore:Client:OnPlayerLoaded')
             FreezeEntityPosition(cache.ped, false)
+            DisplayRadar(true)
 
             local spawnData = spawns[currentButtonID]
             if spawnData.propertyId then
