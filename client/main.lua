@@ -1,13 +1,10 @@
 local config = require 'config.client'
-local previewCam, scaleform, buttonsScaleform
-local currentButtonID, previousButtonID = 1, 1
-local arrowStart = {
-    vec2(-3150.25, -1427.83),
-    vec2(4173.08, 1338.72),
-    vec2(-2390.23, 6262.24)
-}
-
 local spawns
+local previewCam
+local scaleform
+local buttonsScaleform
+local currentButtonId = 1
+local previousButtonId = 1
 
 local function setupCamera()
     previewCam = CreateCamWithParams('DEFAULT_SCRIPTED_CAMERA', -24.77, -590.35, 90.8, -2.0, 0.0, 160.0, 45.0, false, 2)
@@ -106,6 +103,12 @@ end
 
 local function scaleformDetails(index)
     local spawn = spawns[index]
+    local arrowStart = {
+        vec2(-3150.25, -1427.83),
+        vec2(4173.08, 1338.72),
+        vec2(-2390.23, 6262.24)
+    }
+
     BeginScaleformMovieMethod(scaleform, 'ADD_HIGHLIGHT')
     ScaleformMovieMethodAddParamInt(index)
     ScaleformMovieMethodAddParamFloat(spawn.coords.x)
@@ -158,7 +161,7 @@ local function scaleformDetails(index)
 end
 
 local function updateScaleform()
-    if previousButtonID == currentButtonID then return end
+    if previousButtonId == currentButtonId then return end
 
     for i = 1, #spawns, 1 do
         BeginScaleformMovieMethod(scaleform, 'REMOVE_HIGHLIGHT')
@@ -182,26 +185,26 @@ local function updateScaleform()
         EndScaleformMovieMethod()
     end
 
-    scaleformDetails(currentButtonID)
+    scaleformDetails(currentButtonId)
 end
 
 local function inputHandler()
     while DoesCamExist(previewCam) do
         if IsControlJustReleased(0, 188) then
-            previousButtonID = currentButtonID
-            currentButtonID -= 1
+            previousButtonId = currentButtonId
+            currentButtonId -= 1
 
-            if currentButtonID < 1 then
-                currentButtonID = #spawns
+            if currentButtonId < 1 then
+                currentButtonId = #spawns
             end
 
             updateScaleform()
         elseif IsControlJustReleased(0, 187) then
-            previousButtonID = currentButtonID
-            currentButtonID += 1
+            previousButtonId = currentButtonId
+            currentButtonId += 1
 
-            if currentButtonID > #spawns then
-                currentButtonID = 1
+            if currentButtonId > #spawns then
+                currentButtonId = 1
             end
 
             updateScaleform()
@@ -217,7 +220,8 @@ local function inputHandler()
             FreezeEntityPosition(cache.ped, false)
             DisplayRadar(true)
 
-            local spawnData = spawns[currentButtonID]
+            local spawnData = spawns[currentButtonId]
+
             if spawnData.propertyId then
                 TriggerServerEvent('qbx_properties:server:enterProperty', { id = spawnData.propertyId, isSpawn = true })
             else
@@ -263,6 +267,6 @@ AddEventHandler('qb-spawn:client:setupSpawns', function()
 
     Wait(400)
 
-    scaleformDetails(currentButtonID)
+    scaleformDetails(currentButtonId)
     inputHandler()
 end)
