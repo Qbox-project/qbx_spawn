@@ -240,7 +240,7 @@ local function inputHandler()
     stopCamera()
 end
 
-AddEventHandler('qb-spawn:client:setupSpawns', function()
+RegisterNetEvent('qb-spawn:client:setupSpawns', function()
     spawns = {}
 
     local lastCoords, lastPropertyId = lib.callback.await('qbx_spawn:server:getLastLocation')
