@@ -4,7 +4,7 @@ game 'gta5'
 name 'qbx_spawn'
 description 'Spawn selection for Qbox'
 repository 'https://github.com/Qbox-project/qbx_spawn'
-version '0.1.0'
+version '0.1.1'
 
 ox_lib 'locale'
 
