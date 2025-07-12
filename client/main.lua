@@ -1,13 +1,10 @@
 local config = require 'config.client'
-local previewCam, mapScaleform, buttonScaleform
-local currentButtonID, previousButtonID = 1, 1
-local arrowStart = {
-    vec2(-3150.25, -1427.83),
-    vec2(4173.08, 1338.72),
-    vec2(-2390.23, 6262.24)
-}
-
 local spawns
+local previewCam
+local scaleform
+local buttonsScaleform
+local currentButtonId = 1
+local previousButtonId = 1
 
 local function setupCamera()
     previewCam = CreateCamWithParams('DEFAULT_SCRIPTED_CAMERA', -24.77, -590.35, 90.8, -2.0, 0.0, 160.0, 45.0, false, 2)
@@ -30,6 +27,7 @@ end
 local function managePlayer()
     SetEntityCoords(cache.ped, -21.58, -583.76, 86.31, false, false, false, false)
     FreezeEntityPosition(cache.ped, true)
+    DisplayRadar(false)
 
     SetTimeout(500, function()
         DoScreenFadeIn(5000)
@@ -99,6 +97,11 @@ end
 
 local function scaleformDetails(index)
     local spawn = spawns[index]
+    local arrowStart = {
+        vec2(-3150.25, -1427.83),
+        vec2(4173.08, 1338.72),
+        vec2(-2390.23, 6262.24)
+    }
 
     -- Add the highlight to the map 
     mapScaleform:MethodArgs("ADD_HIGHLIGHT", { index, spawn.coords.x, spawn.coords.y, 500.0, 0, 255, 0, 100 })
@@ -123,8 +126,7 @@ local function scaleformDetails(index)
 end
 
 local function updateScaleform()
-    -- Check if the previous button is the same as the current button
-    if previousButtonID == currentButtonID then return end
+    if previousButtonId == currentButtonId then return end
 
     for i = 1, #spawns, 1 do                                          -- Loop through the spawns
         mapScaleform:MethodArgs('REMOVE_HIGHLIGHT', { i })            -- Remove the highlight
@@ -133,7 +135,7 @@ local function updateScaleform()
         mapScaleform:MethodArgs('COLOUR_AREA', { i, 255, 0, 0, 100 }) -- Reset the colour
     end
 
-    scaleformDetails(currentButtonID) -- Add the details for the current button
+    scaleformDetails(currentButtonId)
 end
 
 local function inputHandler()
@@ -143,20 +145,20 @@ local function inputHandler()
 
     while DoesCamExist(previewCam) do
         if IsControlJustReleased(0, 188) then
-            previousButtonID = currentButtonID
-            currentButtonID -= 1
+            previousButtonId = currentButtonId
+            currentButtonId -= 1
 
-            if currentButtonID < 1 then
-                currentButtonID = #spawns
+            if currentButtonId < 1 then
+                currentButtonId = #spawns
             end
 
             updateScaleform()
         elseif IsControlJustReleased(0, 187) then
-            previousButtonID = currentButtonID
-            currentButtonID += 1
+            previousButtonId = currentButtonId
+            currentButtonId += 1
 
-            if currentButtonID > #spawns then
-                currentButtonID = 1
+            if currentButtonId > #spawns then
+                currentButtonId = 1
             end
 
             updateScaleform()
@@ -170,8 +172,10 @@ local function inputHandler()
             TriggerServerEvent('QBCore:Server:OnPlayerLoaded')
             TriggerEvent('QBCore:Client:OnPlayerLoaded')
             FreezeEntityPosition(cache.ped, false)
+            DisplayRadar(true)
 
-            local spawnData = spawns[currentButtonID]
+            local spawnData = spawns[currentButtonId]
+
             if spawnData.propertyId then
                 TriggerServerEvent('qbx_properties:server:enterProperty', { id = spawnData.propertyId, isSpawn = true })
             else
@@ -191,7 +195,7 @@ local function inputHandler()
     stopCamera()
 end
 
-AddEventHandler('qb-spawn:client:setupSpawns', function()
+RegisterNetEvent('qb-spawn:client:setupSpawns', function()
     spawns = {}
 
     local lastCoords, lastPropertyId = lib.callback.await('qbx_spawn:server:getLastLocation')
@@ -205,9 +209,9 @@ AddEventHandler('qb-spawn:client:setupSpawns', function()
         spawns[#spawns + 1] = config.spawns[i]
     end
 
-    local houses = lib.callback.await('qbx_spawn:server:getHouses')
-    for i = 1, #houses do
-        spawns[#spawns + 1] = houses[i]
+    local properties = lib.callback.await('qbx_spawn:server:getProperties')
+    for i = 1, #properties do
+        spawns[#spawns + 1] = properties[i]
     end
 
     Wait(400)
@@ -218,6 +222,6 @@ AddEventHandler('qb-spawn:client:setupSpawns', function()
 
     Wait(400)
 
-    scaleformDetails(currentButtonID)
+    scaleformDetails(currentButtonId)
     inputHandler()
 end)

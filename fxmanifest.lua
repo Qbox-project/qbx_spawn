@@ -4,27 +4,22 @@ game 'gta5'
 name 'qbx_spawn'
 description 'Spawn selection for Qbox'
 repository 'https://github.com/Qbox-project/qbx_spawn'
-version '1.0.0'
+version '0.1.1'
 
 ox_lib 'locale'
 
-shared_scripts {
-	'@ox_lib/init.lua',
-}
+shared_script '@ox_lib/init.lua'
 
-client_scripts {
-	"@qbx_core/modules/lib.lua",
-	'client/main.lua'
-}
+client_script 'client/main.lua'
 
 server_scripts {
-	'@oxmysql/lib/MySQL.lua',
-	'server/main.lua'
+    '@oxmysql/lib/MySQL.lua',
+    'server/main.lua'
 }
 
 files {
-	'config/client.lua',
-	'locales/*.json'
+    'config/client.lua',
+    'locales/*.json'
 }
 
 lua54 'yes'
