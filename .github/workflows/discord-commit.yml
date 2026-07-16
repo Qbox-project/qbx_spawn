@@ -3,7 +3,15 @@ name: Discord Commit
 on:
   push:
 
+permissions:
+  contents: read
+
 jobs:
   notify:
-    uses: Qbox-project/.github/.github/workflows/discord-commit.yml@main
-    secrets: inherit
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Notify Discord
+        uses: Qbox-project/pipeline-pling@696afc4532ae04a07807bb050957691bb7d0c80b # v1.1.0
+        with:
+          webhook-url: ${{ secrets.DISCORD_COMMIT_WEBHOOK }}

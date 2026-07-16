@@ -5,6 +5,10 @@ on:
     inputs:
       version:
         required: true
+        type: string
+
+permissions:
+  contents: read
 
 jobs:
   create-release:
@@ -12,19 +16,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Get App Token
-        uses: actions/create-github-app-token@v1
+        uses: actions/create-github-app-token@d72941d797fd3113feb6b93fd0dec494b13a2547 # v1
         id: generate_token
         with:
           app-id: ${{ secrets.APP_ID }}
           private-key: ${{ secrets.PRIVATE_KEY }}
 
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
           token: ${{ steps.generate_token.outputs.token }}
 
       - name: Setup node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: 20.x
 
@@ -34,7 +38,7 @@ jobs:
           TGT_RELEASE_VERSION: ${{ inputs.version }}
 
       - name: Push manifest change
-        uses: EndBug/add-and-commit@v9
+        uses: EndBug/add-and-commit@a94899bca583c204427a224a7af87c02f9b325d5 # v9
         with:
           add: fxmanifest.lua
           push: true
