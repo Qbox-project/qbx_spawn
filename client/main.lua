@@ -71,9 +71,9 @@ local function setupInstructionalScaleform()
     ScaleformMovieMethodAddParamInt(200)
     EndScaleformMovieMethod()
 
-    setupInstructionalButton(0, 191, 'Submit')
-    setupInstructionalButton(1, 187, 'Down')
-    setupInstructionalButton(2, 188, 'Up')
+    setupInstructionalButton(0, 191, locale('submit') or 'Submit')
+    setupInstructionalButton(1, 187, locale('down') or 'Down')
+    setupInstructionalButton(2, 188, locale('up') or 'Up')
 
     BeginScaleformMovieMethod(buttonsScaleform, 'DRAW_INSTRUCTIONAL_BUTTONS')
     EndScaleformMovieMethod()
@@ -86,7 +86,8 @@ local function setupMap()
         setupInstructionalScaleform()
         createSpawnArea()
         while DoesCamExist(previewCam) do
-            DrawScaleformMovie_3d(scaleform, -24.86, -593.38, 91.8, -180.0, -180.0, -20.0, 0.0, 2.0, 0.0, 3.815, 2.27, 1.0, 2)
+            DrawScaleformMovie_3d(scaleform, -24.86, -593.38, 91.8, -180.0, -180.0, -20.0, 0.0, 2.0, 0.0, 3.815, 2.27,
+                1.0, 2)
 
             HideHudComponentThisFrame(6)
             HideHudComponentThisFrame(7)
@@ -225,7 +226,8 @@ local function inputHandler()
             if spawnData.propertyId then
                 TriggerServerEvent('qbx_properties:server:enterProperty', { id = spawnData.propertyId, isSpawn = true })
             else
-                SetEntityCoords(cache.ped, spawnData.coords.x, spawnData.coords.y, spawnData.coords.z, false, false, false, false)
+                SetEntityCoords(cache.ped, spawnData.coords.x, spawnData.coords.y, spawnData.coords.z, false, false,
+                    false, false)
                 SetEntityHeading(cache.ped, spawnData.coords.w or 0.0)
             end
 
