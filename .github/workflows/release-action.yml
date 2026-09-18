@@ -5,16 +5,19 @@ on:
     tags:
       - "v*"
 
+permissions:
+  contents: read
+
 jobs:
     release-action:
         name: "Create Release"
         runs-on: "ubuntu-latest"
         steps:
             - name: Checkout Repository
-              uses: actions/checkout@v4
+              uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
               with:
                 fetch-depth: 0
-                ref: ${{ github.event.repository.default_branch }}
+                ref: ${{ github.ref_name }}
 
             - name: Install ZIP
               run: sudo apt install zip
@@ -28,7 +31,7 @@ jobs:
                 zip -r ./${{ github.event.repository.name }}.zip ./${{ github.event.repository.name }}
 
             - name: Get App Token
-              uses: actions/create-github-app-token@v1
+              uses: actions/create-github-app-token@d72941d797fd3113feb6b93fd0dec494b13a2547 # v1
               id: generate_token
               with:
                 app-id: ${{ secrets.APP_ID }}
@@ -36,7 +39,7 @@ jobs:
 
             - name: Update CHANGELOG
               id: changelog
-              uses: requarks/changelog-action@v1
+              uses: requarks/changelog-action@b78a3354a01f4a1affb484b9264b506a815c46b1 # v1
               continue-on-error: true
               with:
                 token: ${{ steps.generate_token.outputs.token }}
@@ -46,7 +49,7 @@ jobs:
                 writeToFile: false
 
             - name: Create Release
-              uses: ncipollo/release-action@v1.14.0
+              uses: ncipollo/release-action@2c591bcc8ecdcd2db72b97d6147f871fcd833ba5 # v1.14.0
               with:
                 allowUpdates: true
                 draft: false

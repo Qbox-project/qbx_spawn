@@ -3,19 +3,22 @@ name: "Discord Releases"
 on:
   release:
     types: [published]
-  
+
+permissions:
+  contents: read
+
 jobs:
   github-releases-to-discord:
     name: Discord Releases Changelog
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout Repository
-      uses: actions/checkout@v4
-    - name: Github Releases To Discord
-      uses: SethCohen/github-releases-to-discord@v1.16.2
-      with:
-        webhook_url: ${{ secrets.WEBHOOK_URL }}
-        color: "15852866"
-        username: ${{ github.event.repository.name }}
-        avatar_url: "https://i.imgur.com/Eh1yiLI.png"
-        footer_timestamp: true
+      - name: Checkout Repository
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - name: Github Releases To Discord
+        uses: SethCohen/github-releases-to-discord@6ac5abea42b8cbac14316970819a8a535aab08ea # v1.16.2
+        with:
+          webhook_url: ${{ secrets.WEBHOOK_URL }}
+          color: "15852866"
+          username: ${{ github.event.repository.name }}
+          avatar_url: "https://i.imgur.com/Eh1yiLI.png"
+          footer_timestamp: true
