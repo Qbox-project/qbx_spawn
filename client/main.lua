@@ -244,13 +244,13 @@ RegisterNetEvent('qb-spawn:client:setupSpawns', function()
     spawns = {}
 
     local lastCoords, lastPropertyId = lib.callback.await('qbx_spawn:server:getLastLocation')
-    if not lastCoords then return end
-
-    spawns[#spawns + 1] = {
-        label = locale('last_location'),
-        coords = lastCoords,
-        propertyId = lastPropertyId
-    }
+    if lastCoords then
+        spawns[#spawns + 1] = {
+            label = locale('last_location'),
+            coords = lastCoords,
+            propertyId = lastPropertyId
+        }
+    end
 
     for i = 1, #config.spawns do
         spawns[#spawns + 1] = config.spawns[i]
